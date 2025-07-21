@@ -48,7 +48,7 @@ APPS_CONFIG = {
         "name": "Obsidian",
         "github_url": "https://github.com/obsidianmd/obsidian-releases/releases",
         "process_name": "Obsidian.exe",
-        "enabled": False,  # 是否启用自动更新
+        "enabled": True,  # 是否启用自动更新
         "download_pattern": "Obsidian-{version}.exe",
         "version_format": "v{version}"  # 版本号格式
     },
@@ -56,7 +56,7 @@ APPS_CONFIG = {
         "name": "NoteGen",
         "github_url": "https://github.com/codexu/note-gen/releases",
         "process_name": "NoteGen.exe",
-        "enabled": False,
+        "enabled": True,
         "download_pattern": "NoteGen_{version_clean}_x64-setup.exe",
         "version_format": "note-gen-v{version}"
     },
@@ -64,7 +64,7 @@ APPS_CONFIG = {
         "name": "Yank Note",
         "github_url": "https://github.com/purocean/yn/releases",
         "process_name": "Yank-Note.exe",
-        "enabled": False,
+        "enabled": True,
         "download_pattern": "Yank-Note-win-x64-{version}.exe",
         "version_format": "v{version}"
     },
@@ -72,7 +72,7 @@ APPS_CONFIG = {
         "name": "Joplin",
         "github_url": "https://github.com/laurent22/joplin/releases",
         "process_name": "Joplin.exe",
-        "enabled": False,
+        "enabled": True,
         "download_pattern": "Joplin-Setup-{version}.exe",
         "version_format": "v{version}"
     },
@@ -88,7 +88,7 @@ APPS_CONFIG = {
         "name": "Trilium Notes",
         "github_url": "https://github.com/TriliumNext/Trilium/releases",
         "process_name": "TriliumNotes.exe",
-        "enabled": False,
+        "enabled": True,
         "download_pattern": "TriliumNotes-v{version}-windows-x64.exe",
         "version_format": "v{version}"
     }
