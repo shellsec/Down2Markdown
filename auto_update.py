@@ -46,7 +46,9 @@ logger = logging.getLogger(__name__)
 APPS_CONFIG = {
     "obsidian": {
         "name": "Obsidian",
-        "github_url": "https://github.com/obsidianmd/obsidian-releases/releases",
+        # "github_url": "https://github.com/obsidianmd/obsidian-releases/releases",
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/obsidianmd/obsidian-releases/releases",
         "process_name": "Obsidian.exe",
         "enabled": True,  # 是否启用自动更新
         "download_pattern": "Obsidian-{version}.exe",
@@ -54,7 +56,9 @@ APPS_CONFIG = {
     },
     "notegen": {
         "name": "NoteGen",
-        "github_url": "https://github.com/codexu/note-gen/releases",
+        # "github_url": "https://github.com/codexu/note-gen/releases/latest", 
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/codexu/note-gen/releases/latest", 
         "process_name": "NoteGen.exe",
         "enabled": True,
         "download_pattern": "NoteGen_{version_clean}_x64-setup.exe",
@@ -62,7 +66,9 @@ APPS_CONFIG = {
     },
     "yank_note": {
         "name": "Yank Note",
-        "github_url": "https://github.com/purocean/yn/releases",
+        # "github_url": "https://github.com/purocean/yn/releases/latest", 
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/purocean/yn/releases/latest", 
         "process_name": "Yank-Note.exe",
         "enabled": True,
         "download_pattern": "Yank-Note-win-x64-{version}.exe",
@@ -70,7 +76,9 @@ APPS_CONFIG = {
     },
     "joplin": {
         "name": "Joplin",
-        "github_url": "https://github.com/laurent22/joplin/releases",
+        # "github_url": "https://github.com/laurent22/joplin/releases/latest", 
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/laurent22/joplin/releases/latest",   
         "process_name": "Joplin.exe",
         "enabled": True,
         "download_pattern": "Joplin-Setup-{version}.exe",
@@ -78,7 +86,9 @@ APPS_CONFIG = {
     },
     "siyuan": {
         "name": "思源笔记",
-        "github_url": "https://github.com/siyuan-note/siyuan/releases/latest",
+        # "github_url": "https://github.com/siyuan-note/siyuan/releases/latest",
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/siyuan-note/siyuan/releases/latest",   
         "process_name": "siyuan.exe",
         "enabled": True,
         "download_pattern": "siyuan-{version}-win.exe",
@@ -86,7 +96,9 @@ APPS_CONFIG = {
     },
     "trilium": {
         "name": "Trilium Notes",
-        "github_url": "https://github.com/TriliumNext/Trilium/releases",
+        # "github_url": "https://github.com/TriliumNext/Trilium/releases",
+        # 加速，不用走科学
+        "github_url": "https://bgithub.xyz/TriliumNext/Trilium/releases",    
         "process_name": "TriliumNotes.exe",
         "enabled": True,
         "download_pattern": "TriliumNotes-v{version}-windows-x64.exe",
@@ -145,8 +157,26 @@ def check_latest_version(github_url=None):
             latest_release = soup.select_one('[data-view-component="true"].Link--primary')
         
         if not latest_release:
-            # 在抛出异常之前，先尝试从meta标签中提取版本号
-            logger.info("未找到release元素，尝试从meta标签中提取版本号")
+            # 在抛出异常之前，先尝试从页面标题中提取版本号
+            logger.info("未找到release元素，尝试从页面标题中提取版本号")
+            if soup.title and soup.title.string:
+                title = soup.title.string
+                logger.info(f"页面标题: {title}")
+                # 尝试从标题中提取版本号，支持多种格式
+                version_patterns = [
+                    r'Release.*?v?(\d+\.\d+\.\d+)',  # "Release NoteGen v0.19.7"
+                    r'v(\d+\.\d+\.\d+)',             # "v1.8.10"
+                    r'(\d+\.\d+\.\d+)'               # "1.8.10"
+                ]
+                for pattern in version_patterns:
+                    version_match = re.search(pattern, title, re.IGNORECASE)
+                    if version_match:
+                        version = 'v' + version_match.group(1)
+                        logger.info(f"从页面标题中提取到版本号: {version}")
+                        return version
+            
+            # 尝试从meta标签中提取版本号
+            logger.info("尝试从meta标签中提取版本号")
             for meta in soup.find_all('meta'):
                 if meta.get('content') and '/releases/tag/' in meta.get('content'):
                     version_match = re.search(r'/releases/tag/v?(\d+\.\d+\.\d+)', meta.get('content'))
@@ -242,13 +272,29 @@ def download_installer(version, max_retries=3, app_key="obsidian"):
         download_filename = app_config["download_pattern"].format(version=version_clean)
     
     # 构建下载URL
-    # 如果github_url包含latest，需要替换为具体的版本标签
-    base_url = app_config['github_url']
-    if '/latest' in base_url:
-        # 将 /releases/latest 替换为 /releases/download/{version}
-        base_url = base_url.replace('/releases/latest', '/releases/download')
+    # 获取原始GitHub URL（去掉代理前缀）
+    github_base = app_config['github_url']
+    if 'bgithub.xyz' in github_base:
+        # 将 bgithub.xyz 替换为 github.com
+        github_base = github_base.replace('bgithub.xyz', 'github.com')
     
-    download_url = f"https://gh-proxy.com/{base_url}/{version}/{download_filename}"
+    # 确定发布标签格式
+    release_tag = version
+    if app_key == "notegen":
+        # NoteGen使用特殊的标签格式: note-gen-v{version}
+        release_tag = f"note-gen-{version}"
+    
+    # 构建正确的下载URL格式
+    if '/releases/latest' in github_base:
+        # 将 /releases/latest 替换为 /releases/download/{release_tag}
+        download_base = github_base.replace('/releases/latest', f'/releases/download/{release_tag}')
+    elif '/releases' in github_base:
+        # 将 /releases 替换为 /releases/download/{release_tag}
+        download_base = github_base.replace('/releases', f'/releases/download/{release_tag}')
+    else:
+        download_base = f"{github_base}/releases/download/{release_tag}"
+    
+    download_url = f"{download_base}/{download_filename}"
     local_filename = os.path.join(DOWNLOAD_DIR, download_filename)
     
     logger.info(f"拼接下载链接: {download_url}")
