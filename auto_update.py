@@ -276,7 +276,7 @@ def download_installer(version, max_retries=3, app_key="obsidian"):
     github_base = app_config['github_url']
     if 'bgithub.xyz' in github_base:
         # 将 bgithub.xyz 替换为 github.com
-        github_base = github_base.replace('bgithub.xyz', 'github.com')
+        github_base = github_base.replace('https://bgithub.xyz', 'https://github.com')
     
     # 确定发布标签格式
     release_tag = version
@@ -294,7 +294,8 @@ def download_installer(version, max_retries=3, app_key="obsidian"):
     else:
         download_base = f"{github_base}/releases/download/{release_tag}"
     
-    download_url = f"{download_base}/{download_filename}"
+    # 添加 gh-proxy.com 前缀来加速下载
+    download_url = f"https://gh-proxy.com/{download_base}/{download_filename}"
     local_filename = os.path.join(DOWNLOAD_DIR, download_filename)
     
     logger.info(f"拼接下载链接: {download_url}")
