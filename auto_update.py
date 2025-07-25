@@ -529,15 +529,15 @@ def main():
     try:
         logger.info("=== 开始自动更新过程 ===")
         
-        # 检查网络连接
-        try:
-            logger.info("检查网络连接...")
-            requests.get("https://github.com", timeout=10)
-            logger.info("网络连接正常")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"网络连接错误: {str(e)}")
-            logger.error("请检查您的网络连接并重试")
-            return 1
+        # # 检查网络连接
+        # try:
+        #     logger.info("检查网络连接...")
+        #     requests.get("https://github.com", timeout=10)
+        #     logger.info("网络连接正常")
+        # except requests.exceptions.RequestException as e:
+        #     logger.error(f"网络连接错误: {str(e)}")
+        #     logger.error("请检查您的网络连接并重试")
+        #     return 1
         
         # 获取启用的应用程序列表
         enabled_apps = [app_key for app_key, config in APPS_CONFIG.items() 
